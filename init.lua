@@ -427,7 +427,20 @@ function mobs:register_spawn(name, nodes, max_light, min_light, chance, active_o
 	})
 end
 
-local zombie = {
+function mobs:register_spawning_mob(mob)
+  mobs:register_mob(mob.resource_name, mob)
+  mobs:register_spawn(
+    mob.resource_name,
+    mob.spawn_ground,
+    mob.spawn_max_light,
+    mob.spawn_min_light,
+    mob.spawn_inverse_chance,
+    mob.spawn_max_active_objects,
+    mob.spawn_max_height)
+end
+
+
+mobs:register_spawning_mob({
   resource_name = "zombies:zombie",
   type = "monster",
 	hp_max = 8,
@@ -471,16 +484,6 @@ local zombie = {
   spawn_inverse_chance = 70,
   spawn_max_active_objects = 100,
   spawn_max_height = 31000,
-}
-
-mobs:register_mob(zombie.resource_name, zombie)
-mobs:register_spawn(
-  zombie.resource_name,
-  zombie.spawn_ground,
-  zombie.spawn_max_light,
-  zombie.spawn_min_light,
-  zombie.spawn_inverse_chance,
-  zombie.spawn_max_active_objects,
-  zombie.spawn_max_height)
+})
 
 minetest.log("action", "zombies loaded")
