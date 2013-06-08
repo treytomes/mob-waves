@@ -447,21 +447,21 @@ function mobs:register_spawn(name, nodes, max_light, min_light, chance, active_o
 end
 
 function mobs:register_spawning_mob(mob)
-  mobs:register_mob(mob.resource_name, mob)
-  mobs:register_spawn(
-    mob.resource_name,
-    mob.spawn_ground,
-    mob.spawn_max_light,
-    mob.spawn_min_light,
-    mob.spawn_inverse_chance,
-    mob.spawn_max_active_objects,
-    mob.spawn_max_height)
+	mobs:register_mob(mob.resource_name, mob)
+	mobs:register_spawn(
+		mob.resource_name,
+		mob.spawn_ground,
+		mob.spawn_max_light,
+		mob.spawn_min_light,
+		mob.spawn_inverse_chance,
+		mob.spawn_max_active_objects,
+		mob.spawn_max_height)
 end
 
 
 mobs:register_spawning_mob({
-  resource_name = "zombies:zombie",
-  type = "monster",
+	resource_name = "zombies:zombie",
+	type = "monster",
 	hp_max = 8,
 	collisionbox = {-0.4, -0.01, -0.4, 0.4, 1.9, 0.4},
 	visual = "mesh",
@@ -493,16 +493,16 @@ mobs:register_spawning_mob({
 		punch_start = 74,
 		punch_end = 105,
 	},
-  spawn_ground = {
-    "default:desert_sand",
-    "default:dirt_with_grass",
-    "default:sand",
-  },
-  spawn_min_light = -1,
-  spawn_max_light = 20,
-  spawn_inverse_chance = 70,
-  spawn_max_active_objects = 100,
-  spawn_max_height = 31000,
+	spawn_ground = {
+		"default:desert_sand",
+		"default:dirt_with_grass",
+		"default:sand",
+	},
+	spawn_min_light = -1,
+	spawn_max_light = 20,
+	spawn_inverse_chance = 70,
+	spawn_max_active_objects = 100,
+	spawn_max_height = 31000,
 })
 
 minetest.log("action", "zombies loaded")
