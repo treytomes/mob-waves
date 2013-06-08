@@ -383,6 +383,22 @@ function mobs:register_mob(name, def)
 	})
 end
 
+local function min(x, y)
+	if x < y then return x else return y end
+end
+
+local function distance(a, b)
+	return (a.x - b.x)^2 + (a.y - b.y)^2 + (a.z - b.z)^2
+end
+
+local function distance_to_next_player(pos)
+	local min_dist = 200000 -- longer than minetest world diagonal
+	for _, p in pairs(minetest.get_connected_players()) do
+		min_dist = min(min_dist, distance(pos, p:getpos()))
+	end
+	return min_dist
+end
+
 mobs.spawning_mobs = {}
 function mobs:register_spawn(name, nodes, max_light, min_light, chance, active_object_count, max_height)
 	mobs.spawning_mobs[name] = true
@@ -397,6 +413,9 @@ function mobs:register_spawn(name, nodes, max_light, min_light, chance, active_o
 			end
 			if not mobs.spawning_mobs[name] then
 				return
+			end
+			if distance_to_next_player(pos) < 50 then
+				return -- TODO: do not use magic value 50!
 			end
 			pos.y = pos.y+1
 			if not minetest.env:get_node_light(pos) then
