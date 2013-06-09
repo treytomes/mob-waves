@@ -414,8 +414,8 @@ function mobs:register_spawn(name, nodes, max_light, min_light, chance, active_o
 			if not mobs.spawning_mobs[name] then
 				return
 			end
-			if distance_to_next_player(pos) < 50 then
-				return -- TODO: do not use magic value 50!
+			if distance_to_next_player(pos) < 60 then
+				return -- TODO: do not use magic value!
 			end
 			pos.y = pos.y+1
 			if not minetest.env:get_node_light(pos) then
@@ -456,6 +456,20 @@ function mobs:register_spawning_mob(mob)
 		mob.spawn_inverse_chance,
 		mob.spawn_max_active_objects,
 		mob.spawn_max_height)
+	-- activate and deactivate in waves
+	local deactivate
+	local activate
+	activate = function ()
+		mobs.spawning_mobs[mob.resource_name] = true
+		minetest.after(mob.spawn_wave_active_time, deactivate)
+		--minetest.chat_send_all("wave active")
+	end
+	deactivate = function ()
+		mobs.spawning_mobs[mob.resource_name] = false
+		minetest.after(mob.spawn_wave_inactive_time, activate)
+		--minetest.chat_send_all("wave inactive")
+	end
+	deactivate()
 end
 
 
@@ -503,6 +517,8 @@ mobs:register_spawning_mob({
 	spawn_inverse_chance = 700,
 	spawn_max_active_objects = 30,
 	spawn_max_height = 31000,
+	spawn_wave_inactive_time = 200,
+	spawn_wave_active_time = 100,
 })
 
 minetest.log("action", "zombies loaded")
