@@ -414,7 +414,7 @@ function mobs:register_spawn(name, nodes, max_light, min_light, chance, active_o
 			if not mobs.spawning_mobs[name] then
 				return
 			end
-			if distance_to_next_player(pos) < 60 then
+			if distance_to_next_player(pos) < 55 then
 				return -- TODO: do not use magic value!
 			end
 			pos.y = pos.y+1
@@ -514,11 +514,11 @@ mobs:register_spawning_mob({
 	},
 	spawn_min_light = -1,
 	spawn_max_light = 20,
-	spawn_inverse_chance = 700,
-	spawn_max_active_objects = 30,
+	spawn_inverse_chance = 400,
+	spawn_max_active_objects = 50,
 	spawn_max_height = 31000,
-	spawn_wave_inactive_time = 200,
-	spawn_wave_active_time = 100,
+	spawn_wave_inactive_time = 150,
+	spawn_wave_active_time = 70,
 })
 
 minetest.log("action", "zombies loaded")
