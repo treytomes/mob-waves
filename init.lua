@@ -1,5 +1,5 @@
-mobs = {}
-function mobs:register_mob(name, def)
+mob_waves = {}
+function mob_waves:register_mob(name, def)
 	minetest.register_entity(name, {
 		hp_max = def.hp_max,
 		physical = true,
@@ -35,7 +35,7 @@ function mobs:register_mob(name, def)
 		v_start = false,
 		old_y = nil,
 
-
+		-- I think it would be neat if the zombies moved faster at night, and stayed alive during the day.
 		set_velocity = function(self, v)
 			local yaw = self.object:getyaw()
 			if self.drawtype == "side" then
@@ -109,6 +109,7 @@ function mobs:register_mob(name, def)
 			end
 		end,
 
+		-- This seems to define the zombie's behavior.
 		on_step = function(self, dtime)
 			if self.type == "monster" and minetest.setting_getbool("only_peaceful_mobs") then
 				self.object:remove()
@@ -391,6 +392,7 @@ local function distance(a, b)
 	return (a.x - b.x)^2 + (a.y - b.y)^2 + (a.z - b.z)^2
 end
 
+-- Find the closest player.
 local function distance_to_next_player(pos)
 	local min_dist = 200000 -- longer than minetest world diagonal
 	for _, p in pairs(minetest.get_connected_players()) do
@@ -399,9 +401,9 @@ local function distance_to_next_player(pos)
 	return min_dist
 end
 
-mobs.spawning_mobs = {}
-function mobs:register_spawn(name, nodes, max_light, min_light, chance, active_object_count, max_height)
-	mobs.spawning_mobs[name] = true
+mob_waves.spawning_mobs = {}
+function mob_waves:register_spawn(name, nodes, max_light, min_light, chance, active_object_count, max_height)
+	mob_waves.spawning_mobs[name] = true
 	minetest.register_abm({
 		nodenames = nodes,
 		neighbors = {"air"},
@@ -411,7 +413,7 @@ function mobs:register_spawn(name, nodes, max_light, min_light, chance, active_o
 			if active_object_count_wider > active_object_count then
 				return
 			end
-			if not mobs.spawning_mobs[name] then
+			if not mob_waves.spawning_mobs[name] then
 				return
 			end
 			if distance_to_next_player(pos) < 55 then
@@ -446,9 +448,12 @@ function mobs:register_spawn(name, nodes, max_light, min_light, chance, active_o
 	})
 end
 
-function mobs:register_spawning_mob(mob)
-	mobs:register_mob(mob.resource_name, mob)
-	mobs:register_spawn(
+-- Register a mob to spawn in waves.
+-- This function will register the mob entity, then register a spawn wave handler,
+-- then set the wave to activate and deactivate the waves at a set interval.
+function mob_waves:register_spawning_mob(mob)
+	mob_waves:register_mob(mob.resource_name, mob)
+	mob_waves:register_spawn(
 		mob.resource_name,
 		mob.spawn_ground,
 		mob.spawn_max_light,
@@ -460,21 +465,21 @@ function mobs:register_spawning_mob(mob)
 	local deactivate
 	local activate
 	activate = function ()
-		mobs.spawning_mobs[mob.resource_name] = true
+		mob_waves.spawning_mobs[mob.resource_name] = true
 		minetest.after(mob.spawn_wave_active_time, deactivate)
-		--minetest.chat_send_all("wave active")
+		minetest.chat_send_all("They are coming.")
 	end
 	deactivate = function ()
-		mobs.spawning_mobs[mob.resource_name] = false
+		mob_waves.spawning_mobs[mob.resource_name] = false
 		minetest.after(mob.spawn_wave_inactive_time, activate)
-		--minetest.chat_send_all("wave inactive")
+		minetest.chat_send_all("Peace reigns in the land once again.  Sort of.")
 	end
 	deactivate()
 end
 
 
-mobs:register_spawning_mob({
-	resource_name = "zombies:zombie",
+mob_waves:register_spawning_mob({
+	resource_name = "mob_waves:zombie",
 	type = "monster",
 	hp_max = 2,
 	collisionbox = {-0.4, -0.01, -0.4, 0.4, 1.9, 0.4},
@@ -521,4 +526,4 @@ mobs:register_spawning_mob({
 	spawn_wave_active_time = 70,
 })
 
-minetest.log("action", "zombies loaded")
+minetest.log("action", "mob waves loaded")
