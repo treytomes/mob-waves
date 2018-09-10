@@ -454,7 +454,9 @@ end
 -- This function will register the mob entity, then register a spawn wave handler,
 -- then set the wave to activate and deactivate the waves at a set interval.
 function mob_waves:register_spawning_mob(mob)
+	-- Register the mob entity.
 	mob_waves:register_mob(mob.resource_name, mob)
+
 	mob_waves:register_spawn(
 		mob.resource_name,
 		mob.spawn_ground,
@@ -479,6 +481,32 @@ function mob_waves:register_spawning_mob(mob)
 	deactivate()
 end
 
+function mob_waves:register_mob_wave(mob_def)
+	mob_waves:register_spawn(
+		mob_def.resource_name,
+		mob_def.spawn_ground,
+		mob_def.spawn_max_light,
+		mob_def.spawn_min_light,
+		mob_def.spawn_inverse_chance,
+		mob_def.spawn_max_active_objects,
+		mob_def.spawn_max_height)
+	-- activate and deactivate in waves
+	local deactivate
+	local activate
+	activate = function ()
+		mob_waves.spawning_mobs[mob_def.resource_name] = true
+		minetest.after(mob_def.spawn_wave_active_time, deactivate)
+		minetest.chat_send_all("They are coming.")
+	end
+	deactivate = function ()
+		mob_waves.spawning_mobs[mob_def.resource_name] = false
+		minetest.after(mob_def.spawn_wave_inactive_time, activate)
+		minetest.chat_send_all("Peace reigns in the land once again.  Sort of.")
+	end
+	deactivate()
+end
+
+--[[
 mob_waves:register_spawning_mob({
 	resource_name = "mob_waves:zombie",
 	type = "monster",
@@ -525,6 +553,26 @@ mob_waves:register_spawning_mob({
 	spawn_max_height = 31000,
 	spawn_wave_inactive_time = 150,
 	spawn_wave_active_time = 70,
+})
+--]]
+
+mob_waves:register_mob_wave({
+	resource_name = "creatures:zombie",
+	spawn_ground = {
+		"default:stone",
+		"default:dirt_with_grass",
+		"default:dirt",
+		"default:cobblestone",
+		"default:mossycobble",
+		"group:sand" -- default:desert_sand, default:sand, etc?
+	},
+	spawn_min_light = -1,
+	spawn_max_light = 20,
+	spawn_inverse_chance = 400,
+	spawn_max_active_objects = 50,
+	spawn_max_height = 31000,
+	spawn_wave_inactive_time = 10, -- 150,
+	spawn_wave_active_time = 60, -- 70,
 })
 
 minetest.log("action", "mob waves loaded")
