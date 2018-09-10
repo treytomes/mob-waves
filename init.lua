@@ -1,3 +1,5 @@
+local modpath = minetest.get_modpath(minetest.get_current_modname())
+
 mob_waves = {}
 function mob_waves:register_mob(name, def)
 	minetest.register_entity(name, {
@@ -476,7 +478,6 @@ function mob_waves:register_spawning_mob(mob)
 	end
 	deactivate()
 end
-
 
 mob_waves:register_spawning_mob({
 	resource_name = "mob_waves:zombie",
