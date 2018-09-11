@@ -1,5 +1,11 @@
 local modpath = minetest.get_modpath(minetest.get_current_modname())
 
+--[[
+	minetest.get_timeofday * 24000
+		This will return the actual time (24000 / 0 being midnight).
+		Use this to figure out when to spawn a zombie wave.
+--]]
+
 mob_waves = {}
 function mob_waves:register_mob(name, def)
 	minetest.register_entity(name, {
@@ -394,13 +400,27 @@ local function distance(a, b)
 	return (a.x - b.x)^2 + (a.y - b.y)^2 + (a.z - b.z)^2
 end
 
--- Find the closest player.
+-- Find the distance to the closest player.
 local function distance_to_next_player(pos)
 	local min_dist = 200000 -- longer than minetest world diagonal
 	for _, p in pairs(minetest.get_connected_players()) do
 		min_dist = min(min_dist, distance(pos, p:getpos()))
 	end
 	return min_dist
+end
+
+-- Find the closest player.
+local function get_closest_player(pos)
+	local min_dist = 200000 -- longer than minetest world diagonal
+	local player = nil
+	for _, p in pairs(minetest.get_connected_players()) do
+		local new_dist = distance(pos, p:getpos())
+		if (new_dist < min_dist) or (player == nil) then
+			min_dist = new_dist
+			player = p
+		end
+	end
+	return player
 end
 
 mob_waves.spawning_mobs = {}
@@ -445,7 +465,17 @@ function mob_waves:register_spawn(name, nodes, max_light, min_light, chance, act
 			if minetest.setting_getbool("display_mob_spawn") then
 				minetest.chat_send_all("[mobs] Add "..name.." at "..minetest.pos_to_string(pos))
 			end
-			minetest.env:add_entity(pos, name)
+			
+			local entity = minetest.env:add_entity(pos, name)
+			if entity then
+				-- TODO: Get the entity definition, set mode="attack" and target=player...?  What if there was more than 1 player?
+				local luaentity = entity:get_luaentity()
+				if luaentity then
+					luaentity.mode = "attack"
+					luaentity.target = get_closest_player(pos)
+					minetest.chat_send_all("The "..name.." is angry.")
+				end
+			end
 		end
 	})
 end
@@ -507,53 +537,53 @@ function mob_waves:register_mob_wave(mob_def)
 end
 
 --[[
-mob_waves:register_spawning_mob({
-	resource_name = "mob_waves:zombie",
-	type = "monster",
-	hp_max = 2,
-	collisionbox = {-0.4, -0.01, -0.4, 0.4, 1.9, 0.4},
-	visual = "mesh",
-	mesh = "mobs_zombie.x",
-	textures = {"mobs_zombie.png"},
-	visual_size = {x=8,y=8},
-	makes_footstep_sound = true,
-	view_range = 35,
-	walk_velocity = 1.0,
-	run_velocity = 2.5,
-	damage = 2,
-	drops = {},
-	light_resistant = true,
-	armor = 80,
-	drawtype = "front",
-	water_damage = 1,
-	lava_damage = 5,
-	light_damage = 0,
-	attack_type = "dogfight",
-	animation = {
-		speed_normal = 15,
-		speed_run = 15,
-		stand_start = 0,
-		stand_end = 39,
-		walk_start = 41,
-		walk_end = 72,
-		run_start = 74,
-		run_end = 105,
-		punch_start = 74,
-		punch_end = 105,
-	},
-	spawn_ground = {
-		"default:desert_sand",
-		"default:dirt_with_grass",
-		"default:sand",
-	},
-	spawn_min_light = -1,
-	spawn_max_light = 20,
-	spawn_inverse_chance = 400,
-	spawn_max_active_objects = 50,
-	spawn_max_height = 31000,
-	spawn_wave_inactive_time = 150,
-	spawn_wave_active_time = 70,
-})
+	mob_waves:register_spawning_mob({
+		resource_name = "mob_waves:zombie",
+		type = "monster",
+		hp_max = 2,
+		collisionbox = {-0.4, -0.01, -0.4, 0.4, 1.9, 0.4},
+		visual = "mesh",
+		mesh = "mobs_zombie.x",
+		textures = {"mobs_zombie.png"},
+		visual_size = {x=8,y=8},
+		makes_footstep_sound = true,
+		view_range = 35,
+		walk_velocity = 1.0,
+		run_velocity = 2.5,
+		damage = 2,
+		drops = {},
+		light_resistant = true,
+		armor = 80,
+		drawtype = "front",
+		water_damage = 1,
+		lava_damage = 5,
+		light_damage = 0,
+		attack_type = "dogfight",
+		animation = {
+			speed_normal = 15,
+			speed_run = 15,
+			stand_start = 0,
+			stand_end = 39,
+			walk_start = 41,
+			walk_end = 72,
+			run_start = 74,
+			run_end = 105,
+			punch_start = 74,
+			punch_end = 105,
+		},
+		spawn_ground = {
+			"default:desert_sand",
+			"default:dirt_with_grass",
+			"default:sand",
+		},
+		spawn_min_light = -1,
+		spawn_max_light = 20,
+		spawn_inverse_chance = 400,
+		spawn_max_active_objects = 50,
+		spawn_max_height = 31000,
+		spawn_wave_inactive_time = 150,
+		spawn_wave_active_time = 70,
+	})
 --]]
 
 mob_waves:register_mob_wave({
