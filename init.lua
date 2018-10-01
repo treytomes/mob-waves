@@ -469,6 +469,7 @@ function mob_waves:register_spawn(name, nodes, max_light, min_light, chance, act
 			local entity = minetest.env:add_entity(pos, name)
 			if entity then
 				-- TODO: Get the entity definition, set mode="attack" and target=player...?  What if there was more than 1 player?
+				-- TODO: Change this to work with mobs_redo.
 				local luaentity = entity:get_luaentity()
 				if luaentity then
 					luaentity.mode = "attack"
@@ -586,6 +587,7 @@ end
 	})
 --]]
 
+-- TODO: Spawn a wave of increasing difficulty every 7 days, around 8pm.
 mob_waves:register_mob_wave({
 	resource_name = "creatures:zombie",
 	spawn_ground = {
